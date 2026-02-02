@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pathogen Quest: Phaseolus Defense</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; background: #1a2a1a; color: #cfc; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #game-container { background: #000; border: 3px solid #4a4; padding: 20px; width: 500px; box-shadow: 0 0 20px #2f2; border-radius: 10px; }
+        .stats { display: flex; justify-content: space-between; margin-bottom: 20px; color: #ffeb3b; }
+        #log { height: 150px; overflow-y: auto; border: 1px solid #333; padding: 10px; margin-bottom: 20px; font-size: 0.9rem; background: #050505; }
+        .choices { display: grid; gap: 10px; }
+        button { background: #1a4a1a; color: white; border: 1px solid #4a4; padding: 10px; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #2a6a2a; box-shadow: 0 0 10px #2f2; }
+        .danger { color: #f44; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h2>Pathogen Quest 🌿</h2>
+    <div class="stats">
+        <span>Plant Health: <span id="health">100</span>%</span>
+        <span>Atmosphere: <span id="co2-status">Ambient</span></span>
+    </div>
+    <div id="log">A Sclerotinia spore has landed on your leaf. The infection is beginning...</div>
+    <div class="choices" id="choice-buttons">
+        <button onclick="chooseAction('sa')">Activate Salicylic Acid (SA)</button>
+        <button onclick="chooseAction('ja')">Activate Jasmonic Acid (JA)</button>
+        <button onclick="chooseAction('co2')">Trigger eCO2 (800ppm)</button>
+    </div>
+</div>
+
+<script>
+    let health = 100;
+    let isElevated = false;
+    const log = document.getElementById('log');
+
+    function updateLog(msg, isDanger = false) {
+        const span = document.createElement('p');
+        if (isDanger) span.className = 'danger';
+        span.innerText = "> " + msg;
+        log.appendChild(span);
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function chooseAction(choice) {
+        if (health <= 0) return;
+
+        if (choice === 'sa') {
+            let damage = isElevated ? 25 : 15;
+            health -= damage;
+            updateLog("You triggered SA (Hypersensitive Response). The necrotroph feeds on the dead cells!");
+            updateLog(`Plant took ${damage}% damage!`, true);
+        } 
+        else if (choice === 'ja') {
+            let damage = isElevated ? 10 : 5;
+            health -= damage;
+            updateLog("JA defense activated! You slowed the hyphae, but it's still spreading.");
+            updateLog(`Plant took ${damage}% damage.`, true);
+        } 
+        else if (choice === 'co2') {
+            isElevated = true;
+            document.getElementById('co2-status').innerText = "Elevated (800ppm)";
+            updateLog("CO2 levels spike! Pathogen enzymes are now more aggressive.", true);
+            document.getElementById('game-container').style.borderColor = "#f44";
+        }
+
+        document.getElementById('health').innerText = health;
+
+        if (health <= 0) {
+            document.getElementById('health').innerText = "0";
+            updateLog("CRITICAL FAILURE: The plant has succumbed to necrosis.", true);
+            document.getElementById('choice-buttons').innerHTML = "<button onclick='location.reload()'>Restart Experiment</button>";
+        }
+    }
+</script>
+</body>
+</html>
